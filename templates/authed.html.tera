@@ -1,0 +1,21 @@
+{% extends "base" %}
+{% block head %}
+    <link rel="stylesheet" href="css/authed.css" />
+    <!-- <link rel="stylesheet" href="css/login.css" /> -->
+{% endblock head %}
+{% block body %}
+<main class="container">
+    <article class="grid">
+      <div class="">
+        <hgroup>
+          <h1>Welcome, {{user_name}}</h1>
+          <p>You've successfully logged in.</p>
+        </hgroup>
+        <form action="/console" method="POST">
+            <input type="hidden" value="{{token}}">
+          <button type="submit" placeholder="Valid">Login</button>
+        </form>
+      </div>
+    </article>
+  </main>
+{% endblock body %}

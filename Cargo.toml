@@ -1,0 +1,20 @@
+workspace = { members = [ "src/minecraft_manager","src/password_lib"] }
+[package]
+name = "minecraft_management_console"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ansi-to-html = "0.2.1"
+rocket = { version = "0.5.0", features = ["json"] }
+sha2 = "0.10.8"
+ws = { package = "rocket_ws", version = "0.1.0" }
+
+[dependencies.rocket_dyn_templates]
+version = "0.1.0"
+features = ["tera"]
+
+[dependencies.password_lib]
+path = "./src/password_lib"

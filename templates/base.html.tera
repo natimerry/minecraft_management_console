@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login to Faketernos</title>
+    <!-- <meta name="description" content="A minimalist layout for Login pages. Built with Pico CSS." /> -->
+    <!-- <link rel="shortcut icon" href="https://picocss.com/favicon.ico" /> -->
+    <link href="data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAA2ml4ANUxrAC5wSAA6dlgAN05uABYfLQAXITAAM3ROABQdKwA9oWQAIjFFAESnbAAeODoAUKp8ACAvQwAXIi4AMTM3AEKebQArP1gAIUE6ACg7UwA0mVsAJTdOACxBWwAYIjcAGSU3ACAvRAAtQ14ALpBUACdtQwAQFyUAHSs/ABEaJQAfLj8AVK+AADyFWgAfLUIANEtpAC1rSQAhM0oAFUAmAEaqbgA4m18AIzVNABsoOAAiMkUAOlN0ABgkMwAdSS4AO6BiABMcKQAjZz0AEyMmADlRcgAYIjEAJTZLADmbYAA3lFsASalyACMyRgAvRmAAZL6RACt6SgBfuowAHCwuAE9SVgAylVkAJzpRAB9gOQAXPSgAK0BZAEOmawBYuIIAFjQpACY4TwAiTDgAQaRpAEancQAhMEUA////ADNKZwAxRmIAVrOBACQsOAA9nWUAXLaJADNAUgA0PkcASaRyABomOQAfLT4AOZxgACEzRgAcKTkAHlg5AEqtcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT09PT09PT04sT09PT09PT09PT09PFko8LAoZT09PT09PT09WN1AWUQUvBQ8sT09PTysEN0NDGkEhWlwvLC8GT08SK1FXAS5dGQYPUywGWk9PDiVKFlErFDYWJDY7MlNPTzwrF0YuJx8vWgYsWjcQT08WNStZGCcTQAhaIC0vMk9PHxsXSwNLMzBLIDQeNi9PTysaDF4HPjo/M0lFSw8gT09TJksjSFU5OVRbJktJSU9PAh0/KhEJOUcJC0dMRChPT01VHFJHDSIJCUI6ADEVT09PT184PQkAUgApUglPT09PT09PTwkxEQBYW09PT09PT09PT09PTwspT09PT09PT/5/AAD4HwAA4AcAAIABAACAAQAAgAEAAIABAACAAQAAgAEAAIABAACAAQAAgAEAAIABAADgBwAA+B8AAP5/AAA=" rel="icon" type="image/x-icon">
+    <!-- Pico.css -->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+
+    <!-- Custom styles for this example -->
+    <link rel="stylesheet" href="css/base.css" />
+    {% block head %}
+
+
+    {% endblock head %}
+  </head>
+
+  <body>
+    <!-- Nav -->
+    <nav class="container-fluid">
+      <ul>
+        <li>
+          <a href="./" class="contrast" onclick="event.preventDefault()"><strong>Faketernos</strong></a>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <details role="list" dir="rtl">
+            <summary aria-haspopup="listbox" role="link" class="secondary">Theme</summary>
+            <ul role="listbox">
+              <li><a href="#" data-theme-switcher="auto">Auto</a></li>
+              <li><a href="#" data-theme-switcher="light">Light</a></li>
+              <li><a href="#" data-theme-switcher="dark">Dark</a></li>
+            </ul>
+          </details>
+        </li>
+      </ul>
+    </nav>
+    <!-- ./ Nav -->
+
+    {% block body %}
+
+
+    {% endblock body %}
+
+    <!-- Footer -->
+    <footer class="container-fluid">
+      <small
+        >Built with <a href="https://rocket.rs" class="secondary">Rocket</a> •
+        <a href="https://github.com/natimerry/" class="secondary"
+          >Source code</a
+        ></small
+      >
+    </footer>
+    <!-- ./ Footer -->
+
+    <!-- Minimal theme switcher -->
+    <script src="js/minimal-theme-switcher.js"></script>
+  </body>
+</html>

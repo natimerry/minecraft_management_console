@@ -1,0 +1,20 @@
+{% extends "base" %}
+{% block head %}
+    <link rel="stylesheet" href="css/authed.css" />
+    <!-- <link rel="stylesheet" href="css/login.css" /> -->
+{% endblock head %}
+{% block body %}
+<main class="container">
+    <article class="grid">
+      <div class="">
+        <hgroup>
+          <h1>Hey, {{user_name}}</h1>
+          <p>Your username has been added to our database. You need to contact the site admins to get authorised.</p>
+        </hgroup>
+        <form action="/" method="get">
+          <button type="submit" placeholder="Valid">Go Back</button>
+        </form>
+      </div>
+    </article>
+  </main>
+{% endblock body %}
