@@ -12,7 +12,8 @@
           <p>You've successfully logged in.</p>
         </hgroup>
         <form action="/console" method="POST">
-            <input type="hidden" value="{{token}}">
+            <input name="user_name" type="hidden" value="{{user_name}}">
+            <input name="token" type="hidden" value="{{token}}">
           <button type="submit" placeholder="Valid">Login</button>
         </form>
       </div>

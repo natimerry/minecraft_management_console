@@ -897,6 +897,7 @@ name = "minecraft_management_console"
 version = "0.1.0"
 dependencies = [
  "ansi-to-html",
+ "minecraft_manager",
  "password_lib",
  "rocket",
  "rocket_dyn_templates",

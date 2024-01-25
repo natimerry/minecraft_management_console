@@ -1,0 +1,84 @@
+{% extends "base" %}
+{% block head %}
+<link rel="stylesheet" href="css/base.css" />
+<!-- <link rel="stylesheet" href="css/login.css" /> -->
+{% endblock head %}
+{% block body %}
+<main class="container">
+    <div class="grid">
+        <article>
+            <div>
+                <form action="/create" method="post">
+                    <h1>Create a new server </h1>
+                    <input type="text" name="server_name" placeholder="Server Name" aria-label="Server Name"
+                        autocomplete="servername" required />
+
+                    <textarea type="text" name="description" placeholder="Server description"
+                        aria-label="Server description" required></textarea>
+
+                    <details role="list">
+                        <summary aria-haspopup="listbox">Select Version</summary>
+                        <ul role="listbox">
+                            <li>
+                                <label for="1.20">
+                                    <input type="radio" id="small" name="size" value="1.20">
+                                    Small
+                                </label>
+                            </li>
+                            <li>
+                                <label for="1.8.9">
+                                    <input type="radio" id="medium" name="size" value="1.8.9">
+                                    Medium
+                                </label>
+                            </li>
+                            <li>
+                                <label for="1.19">
+                                    <input type="radio" id="large" name="size" value="1.19">
+                                    Large
+                                </label>
+                            </li>
+                        </ul>
+                    </details>
+
+                    <input type="submit">
+
+                </form>
+            </div>
+
+        </article>
+
+
+        <article>
+            <div>
+                <hgroup>
+                    <h1>List of created servers</h1>
+                    <p>Manage all the servers from this panel!</p>
+                </hgroup>
+                {% for server in servers %}
+                <hgroup>
+                    <h4>{{server}}</h4>
+                    <details>
+                        <summary>Some Server details</summary>
+                        <h6>
+                            Server file acess
+                        </h6>
+                            <article class="container grid"">
+                                    <button class="outline contrast">Server Console</button>
+                                    <button class="outline contrast">Server Properties</button>
+
+                            </article>
+
+                            <input type="text" placeholder="Email address">
+                            <button class="outline">Add to whitelist</button>
+
+                    </details>
+                </hgroup>
+                {% endfor %}
+            </div>
+
+        </article>
+
+
+    </div>
+</main>
+{% endblock body %}
