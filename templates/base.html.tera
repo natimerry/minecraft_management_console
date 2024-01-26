@@ -18,19 +18,19 @@
 
     {% endblock head %}
   </head>
-
-  <body>
+  <div class="bg_image"></div>
+  <body style="background: rgba(0, 0, 0, 0);">
     <!-- Nav -->
     <nav class="container-fluid">
       <ul>
         <li>
-          <a href="./" class="contrast" onclick="event.preventDefault()"><strong>Faketernos</strong></a>
+          <h1 class="navbar_elem">Faketernos</h1>
         </li>
       </ul>
       <ul>
         <li>
           <details role="list" dir="rtl">
-            <summary aria-haspopup="listbox" role="link" class="secondary">Theme</summary>
+            <summary aria-haspopup="listbox" role="button" class="outline navbar_elem">Theme</summary>
             <ul role="listbox">
               <li><a href="#" data-theme-switcher="auto">Auto</a></li>
               <li><a href="#" data-theme-switcher="light">Light</a></li>

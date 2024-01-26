@@ -16,28 +16,12 @@
                     <textarea type="text" name="description" placeholder="Server description"
                         aria-label="Server description" required></textarea>
 
+
                     <details role="list">
-                        <summary aria-haspopup="listbox">Select Version</summary>
-                        <ul role="listbox">
-                            <li>
-                                <label for="1.20">
-                                    <input type="radio" id="small" name="size" value="1.20">
-                                    Small
-                                </label>
-                            </li>
-                            <li>
-                                <label for="1.8.9">
-                                    <input type="radio" id="medium" name="size" value="1.8.9">
-                                    Medium
-                                </label>
-                            </li>
-                            <li>
-                                <label for="1.19">
-                                    <input type="radio" id="large" name="size" value="1.19">
-                                    Large
-                                </label>
-                            </li>
-                        </ul>
+                        <summary id="loader" aria-busy="true" aria-haspopup="listbox">Select Version</summary>
+                            <ul id="listbox" class="radio-select" role="listbox">
+                                
+                            </ul>
                     </details>
 
                     <input type="submit">
@@ -46,7 +30,6 @@
             </div>
 
         </article>
-
 
         <article>
             <div>
@@ -62,14 +45,14 @@
                         <h6>
                             Server file acess
                         </h6>
-                            <article class="container grid"">
-                                    <button class="outline contrast">Server Console</button>
-                                    <button class="outline contrast">Server Properties</button>
+                        <article class="container grid"">
+                                    <button class=" outline contrast">Server Console</button>
+                            <button class="outline contrast">Server Properties</button>
 
-                            </article>
+                        </article>
 
-                            <input type="text" placeholder="Email address">
-                            <button class="outline">Add to whitelist</button>
+                        <input type="text" placeholder="Email address">
+                        <button class="outline">Add to whitelist</button>
 
                     </details>
                 </hgroup>
@@ -81,4 +64,53 @@
 
     </div>
 </main>
+<script>
+    var receive_uri = "ws://127.0.0.1:8000/rx";
+    function init() {
+        log = document.getElementById("listbox");
+        testWebSocket();
+
+
+    }
+
+    function testWebSocket() {
+        websocket = new WebSocket(receive_uri);
+        websocket.onopen = onOpen;
+        websocket.onclose = onClose;
+        websocket.onmessage = onMessage;
+    }
+
+    function onOpen(evt) {
+        // writeLog("CONNECTED");
+        console.log("CONNECTED TO WEBSOCKET");
+    }
+
+    function onClose(evt) {
+        console.log("Websocket DISCONNECTED");
+        document.getElementById("loader").ariaBusy = false;
+        var pre = document.getElementById("listbox").innerHTML+="<div></div>";
+    }
+
+    function onMessage(evt) {
+        writeLog(evt.data);
+    }
+
+
+    function writeLog(message) {
+        console.log(message);
+        var pre = document.getElementById("listbox");
+        var html =
+            "<li>\
+                <label for=\"small\">\
+                    <input type=\"radio\" name=\"version\" value=\"{message}\"> \
+                    {message} \
+                </label> \
+            </li>".replaceAll("\n","").replaceAll("{message}", message);
+        console.log(html);
+        pre.innerHTML += html;
+
+    }
+    window.addEventListener("load", init, false);
+
+</script>
 {% endblock body %}

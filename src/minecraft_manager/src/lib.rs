@@ -1,17 +1,36 @@
 mod server;
+use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
-    default,
     fs::{self, ReadDir},
 };
 
-use server::mc_server::{Server, ServerErrors};
+use reqwest::Error;
+use server::mc_server::Server;
+use server::ServerErrors;
+
+#[derive(Deserialize, Serialize, Debug)]
+struct PaperVersion {
+    project_id: String,
+    project_name: String,
+    version_groups: Vec<String>,
+    versions: Vec<String>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+struct PaperVersionCommits {
+    project_id: String,
+    project_name: String,
+    builds: Vec<i64>,
+    version: String,
+}
 
 #[derive(Default)]
 pub struct McServerManager {
     directory: Option<String>,
     installations: HashMap<String, Server>,
     plugins: Vec<String>,
+    version_uri: HashMap<String, String>, // map of version:versionURI
 }
 
 impl McServerManager {
@@ -20,6 +39,7 @@ impl McServerManager {
             directory: None,
             installations: HashMap::new(),
             plugins: vec![],
+            ..Default::default()
         }
     }
     pub fn set_directory(mut self, directory: String) -> Self {
@@ -67,5 +87,53 @@ impl McServerManager {
             .keys()
             .map(|entry| entry.rsplit("/").collect::<Vec<&str>>()[0].to_string())
             .collect::<Vec<String>>())
+    }
+
+    pub async fn get_available_versions(&mut self) -> Result<HashMap<String, String>, Error> {
+        let response = reqwest::get("https://api.papermc.io/v2/projects/paper/")
+            .await?
+            .json::<PaperVersion>()
+            .await;
+        match response {
+            Ok(parsed) => {
+                for version in parsed.versions {
+                    dbg!(&version);
+                    let latest_commit = get_latest_commit(&version).await?;
+                    let uri = dbg!(format!("https://api.papermc.io/v2/projects/paper/versions/{}/builds/{}/downloads/paper-1.20.4-{}.jar",
+                                                version,
+                                                latest_commit,
+                                                latest_commit)
+                                            );
+                    self.version_uri.insert(version, uri);
+                }
+            }
+            Err(e) => {
+                return Err(dbg!(e));
+            }
+        }
+        Ok(self.version_uri.clone())
+    }
+}
+
+async fn get_latest_commit(version: &str) -> Result<String, reqwest::Error> {
+    let response = reqwest::get(dbg!(format!(
+        "https://api.papermc.io/v2/projects/paper/versions/{}",
+        version
+    )))
+    .await?
+    .json::<PaperVersionCommits>()
+    .await;
+
+    match response {
+        Ok(parsed) => {
+            dbg!(&parsed);
+            let final_commit = parsed.builds.last().unwrap();
+            return Ok(final_commit.to_string());
+        }
+        Err(e) => {
+            println!("Error parsing data {:?}", e);
+
+            return Err(e);
+        }
     }
 }
