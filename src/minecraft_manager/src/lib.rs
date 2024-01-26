@@ -94,7 +94,7 @@ impl McServerManager {
             .map(|entry| entry.rsplit("/").collect::<Vec<&str>>()[0].to_string())
             .collect::<Vec<String>>())
     }
-    fn add_to_cache(&self,version: &str, uri: &str) {
+    fn add_to_cache(&self, version: &str, uri: &str) {
         let mut file: std::fs::File = std::fs::OpenOptions::new()
             .append(true)
             .create(true)
@@ -134,23 +134,19 @@ impl McServerManager {
                         );
                     } else {
                         let latest_commit = get_latest_commit(&version).await?;
-                        let uri = dbg!(format!("https://api.papermc.io/v2/projects/paper/versions/{}/builds/{}/downloads/paper-{}-{}.jar",
-                                                version,
-                                                version,
-                                                latest_commit,
-                                                latest_commit)
-                                            );
+                        let uri = dbg!(
+                            format!(
+            "https://api.papermc.io/v2/projects/paper/versions/{version}/builds/{latest_commit}/downloads/paper-{version}-{latest_commit}.jar"
+                                ));
                         self.add_to_cache(&version, &uri);
                         self.version_uri.insert(version, uri);
                     }
                 }
                 // get latest build from latest version anyways
                 let latest_commit = get_latest_commit(&latest_verison).await?;
-                let uri = dbg!(format!("https://api.papermc.io/v2/projects/paper/versions/{}/builds/{}/downloads/paper-1.20.4-{}.jar",
-                                                latest_verison,
-                                                latest_commit,
-                                                latest_commit)
-                                            );
+                let uri = dbg!(format!(
+            "https://api.papermc.io/v2/projects/paper/versions/{latest_verison}/builds/{latest_commit}/downloads/paper-{latest_verison}-{latest_commit}.jar",
+                                            ));
                 self.version_uri.insert(latest_verison, uri);
             }
             Err(e) => {
@@ -160,7 +156,6 @@ impl McServerManager {
         Ok(self.version_uri.clone())
     }
 }
-
 
 async fn get_latest_commit(version: &str) -> Result<String, reqwest::Error> {
     let response = reqwest::get(dbg!(format!(
