@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fs::{self, ReadDir},
+    io::Write,
 };
 
 use reqwest::Error;
@@ -30,6 +31,7 @@ pub struct McServerManager {
     directory: Option<String>,
     installations: HashMap<String, Server>,
     plugins: Vec<String>,
+    cache_file: String,
     version_uri: HashMap<String, String>, // map of version:versionURI
 }
 
@@ -42,11 +44,15 @@ impl McServerManager {
             ..Default::default()
         }
     }
-    pub fn set_directory(mut self, directory: String) -> Self {
-        self.directory = Some(directory);
+    pub fn set_directory(mut self, directory: &str) -> Self {
+        self.directory = Some(directory.to_string());
         self
     }
 
+    pub fn set_cache_directory(mut self, file: &str) -> Self {
+        self.cache_file = file.to_string();
+        self
+    }
     fn update_isntallations(&mut self) -> Result<(), ServerErrors> {
         let paths: ReadDir;
         match &self.directory {
@@ -88,7 +94,14 @@ impl McServerManager {
             .map(|entry| entry.rsplit("/").collect::<Vec<&str>>()[0].to_string())
             .collect::<Vec<String>>())
     }
-
+    fn add_to_cache(&self,version: &str, uri: &str) {
+        let mut file: std::fs::File = std::fs::OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open(&self.cache_file)
+            .unwrap();
+        writeln!(file, "{}:{}", version, uri);
+    }
     pub async fn get_available_versions(&mut self) -> Result<HashMap<String, String>, Error> {
         let response = reqwest::get("https://api.papermc.io/v2/projects/paper/")
             .await?
@@ -96,16 +109,48 @@ impl McServerManager {
             .await;
         match response {
             Ok(parsed) => {
+                let cached_builds = std::fs::read_to_string(&self.cache_file)
+                    .unwrap()
+                    .lines()
+                    .map(|line| {
+                        let entry = line
+                            .split_once(':')
+                            .expect("Infallible state reached. Cant split db entry");
+                        (entry.0.to_string(), entry.1.to_string())
+                    })
+                    .collect::<HashMap<String, String>>();
+                // get latest version
+                let latest_verison = parsed.versions.last().unwrap().clone();
+
                 for version in parsed.versions {
-                    dbg!(&version);
-                    let latest_commit = get_latest_commit(&version).await?;
-                    let uri = dbg!(format!("https://api.papermc.io/v2/projects/paper/versions/{}/builds/{}/downloads/paper-1.20.4-{}.jar",
+                    if version == latest_verison {
+                        continue;
+                    }
+
+                    if cached_builds.contains_key(&version) {
+                        self.version_uri.insert(
+                            version.clone(),
+                            dbg!(cached_builds.get(&version).unwrap().to_string()),
+                        );
+                    } else {
+                        let latest_commit = get_latest_commit(&version).await?;
+                        let uri = dbg!(format!("https://api.papermc.io/v2/projects/paper/versions/{}/builds/{}/downloads/paper-1.20.4-{}.jar",
                                                 version,
                                                 latest_commit,
                                                 latest_commit)
                                             );
-                    self.version_uri.insert(version, uri);
+                        self.add_to_cache(&version, &uri);
+                        self.version_uri.insert(version, uri);
+                    }
                 }
+                // get latest build from latest version anyways
+                let latest_commit = get_latest_commit(&latest_verison).await?;
+                let uri = dbg!(format!("https://api.papermc.io/v2/projects/paper/versions/{}/builds/{}/downloads/paper-1.20.4-{}.jar",
+                                                latest_verison,
+                                                latest_commit,
+                                                latest_commit)
+                                            );
+                self.version_uri.insert(latest_verison, uri);
             }
             Err(e) => {
                 return Err(dbg!(e));
@@ -114,6 +159,7 @@ impl McServerManager {
         Ok(self.version_uri.clone())
     }
 }
+
 
 async fn get_latest_commit(version: &str) -> Result<String, reqwest::Error> {
     let response = reqwest::get(dbg!(format!(

@@ -14,7 +14,7 @@ struct Token {
 #[post("/console", data = "<token>")]
 pub async fn console_page(token: Form<Token>) -> Template {
     let mut mc_manager = minecraft_manager::McServerManager::new()
-        .set_directory("./src/minecraft_manager/mc".to_string());
+        .set_directory("./src/minecraft_manager/mc");
 
     let servers = mc_manager.get_installations().unwrap();
 
@@ -31,14 +31,23 @@ pub fn tx_channel(ws: ws::WebSocket) -> ws::Channel<'static> {
 
     ws.channel(move |mut stream| {
         Box::pin(async move {
-            let versions = minecraft_manager::McServerManager::new()
-                .set_directory("./src/minecraft_manager/mc".to_string())
+            let mut versions = minecraft_manager::McServerManager::new()
+                .set_cache_directory("./cache.txt")
                 .get_available_versions()
                 .await
                 .unwrap()
                 .keys()
                 .map(|key| key.clone())
                 .collect::<Vec<String>>();
+                
+                versions.sort_by(|k,v|{
+                    let v1 = &k[2..4].replace(".", "");
+                    let v2 = &v[2..4].replace(".", "");
+
+                    v1.parse::<i32>().unwrap().cmp(&v2.parse::<i32>().unwrap())                    
+                    // dbg!(&k[2..4].replace(".", "")).parse::<i32>().unwrap().cmp(&v[2..4].replace(".", to).parse::<i32>().unwrap())
+                });
+                versions.reverse();
             // 
             for i in versions{
                 println!("SENDING VERSION: {}",i);
