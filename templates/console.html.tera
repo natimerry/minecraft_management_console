@@ -1,11 +1,11 @@
 {% extends "base" %}
 {% block head %}
-<link rel="stylesheet" href="css/console.css" />
+<link rel="stylesheet" href="css/base.css" />
 <!-- <link rel="stylesheet" href="css/login.css" /> -->
 {% endblock head %}
 {% block body %}
 <main class="container">
-    <div class="grid console-grid">
+    <div class="grid">
         <article>
             <div>
                 <form action="/create" method="post">

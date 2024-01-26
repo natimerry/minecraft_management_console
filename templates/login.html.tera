@@ -25,7 +25,7 @@
             autocomplete="current-password"
             required
           />
-          <button type="submit" class="contrast">Proceed to console</button>
+          <button type="submit" class="">Proceed to console</button>
         </form>
       </div>
       <div></div>

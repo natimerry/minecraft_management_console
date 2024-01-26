@@ -77,7 +77,9 @@ article div:nth-of-type(2) {
   }
 }
 
+/* Footer */
 body>footer {
+  /* position: sticky; */
   padding: 1rem 0;
 }
 
