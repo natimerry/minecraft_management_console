@@ -37,7 +37,10 @@ pub fn tx_channel(ws: ws::WebSocket) -> ws::Channel<'static> {
                 .await
                 .unwrap()
                 .keys()
-                .map(|key| key.clone())
+                .map(|key| {
+                    println!("{}",key);
+                    key.clone()
+                })
                 .collect::<Vec<String>>();
                 
                 versions.sort_by(|k,v|{

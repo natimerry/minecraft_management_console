@@ -1,9 +1,17 @@
 /* Grid */
+body{
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+  height: 100vh;
+}
 body>main {
+  margin-bottom: auto;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: calc(100vh - 7rem);
+  /* min-height: 100vh; */
   padding: 1rem 0;
 }
 
@@ -23,6 +31,12 @@ article div {
 
   article div {
     padding: 1.25rem;
+  }
+}
+
+@media (max-width: 991px) {
+  body{
+    overflow-y: scroll;
   }
 }
 
@@ -48,11 +62,11 @@ article div {
 
 @media (min-width: 1200px) {
   body>main {
-    padding: 2rem 0;
+    padding: 1.5rem 0;
   }
 
   article div {
-    padding: 2rem;
+    padding: 1.5rem;
   }
 }
 
@@ -79,8 +93,12 @@ article div:nth-of-type(2) {
 
 /* Footer */
 body>footer {
-  /* position: sticky; */
-  padding: 1rem 0;
+  /* position:sticky; */
+  bottom: 0;
+  padding: 0;
+  margin-bottom: 0;
+  margin-top: auto;
+  padding-bottom: 30px;
 }
 
 
@@ -116,6 +134,7 @@ body>footer {
 .bg_image {
   background-image: url("../img/mc_bg.jpg");
   background-size: cover;
+  scale: 102%;
   background-position: center;
   position: fixed;
   width: 100%;

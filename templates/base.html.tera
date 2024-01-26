@@ -19,7 +19,7 @@
     {% endblock head %}
   </head>
   <div class="bg_image"></div>
-  <body style="background: rgba(0, 0, 0, 0);">
+  <body>
     <!-- Nav -->
     <nav class="container-fluid">
       <ul>
