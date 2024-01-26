@@ -1,4 +1,6 @@
+cargo-features = ["profile-rustflags"]
 workspace = { members = [ "src/minecraft_manager","src/password_lib"] }
+
 [package]
 name = "minecraft_management_console"
 version = "0.1.0"
@@ -22,8 +24,8 @@ path = "./src/password_lib"
 [dependencies.minecraft_manager]
 path = "./src/minecraft_manager"
 
-[target.x86_64-unknown-linux-gnu]
+
+[profile.dev]
 rustflags = [
     "-C", "link-arg=-fuse-ld=lld",
 ]
-
