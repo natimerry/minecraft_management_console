@@ -21,3 +21,9 @@ path = "./src/password_lib"
 
 [dependencies.minecraft_manager]
 path = "./src/minecraft_manager"
+
+[target.x86_64-unknown-linux-gnu]
+rustflags = [
+    "-C", "link-arg=-fuse-ld=lld",
+]
+

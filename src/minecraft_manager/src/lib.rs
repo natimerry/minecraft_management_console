@@ -134,7 +134,8 @@ impl McServerManager {
                         );
                     } else {
                         let latest_commit = get_latest_commit(&version).await?;
-                        let uri = dbg!(format!("https://api.papermc.io/v2/projects/paper/versions/{}/builds/{}/downloads/paper-1.20.4-{}.jar",
+                        let uri = dbg!(format!("https://api.papermc.io/v2/projects/paper/versions/{}/builds/{}/downloads/paper-{}-{}.jar",
+                                                version,
                                                 version,
                                                 latest_commit,
                                                 latest_commit)
