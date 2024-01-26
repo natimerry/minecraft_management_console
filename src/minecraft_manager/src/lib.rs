@@ -53,7 +53,7 @@ impl McServerManager {
         self.cache_file = file.to_string();
         self
     }
-    fn update_isntallations(&mut self) -> Result<(), ServerErrors> {
+    fn update_installations(&mut self) -> Result<(), ServerErrors> {
         let paths: ReadDir;
         match &self.directory {
             Some(dir) => paths = fs::read_dir(&dir)?,
@@ -87,7 +87,7 @@ impl McServerManager {
         Ok(())
     }
     pub fn get_installations(&mut self) -> Result<Vec<String>, ServerErrors> {
-        self.update_isntallations()?;
+        self.update_installations()?;
         Ok(self
             .installations
             .keys()
