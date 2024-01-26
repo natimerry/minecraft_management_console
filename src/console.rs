@@ -53,7 +53,7 @@ pub fn tx_channel(ws: ws::WebSocket) -> ws::Channel<'static> {
                 versions.reverse();
             // 
             for i in versions{
-                println!("SENDING VERSION: {}",i);
+                // println!("SENDING VERSION: {}",i);
                 stream.send(i.clone().into()).await.unwrap();
             }
             Ok(())

@@ -24,7 +24,9 @@ impl From<OsString> for ServerErrors {
 
 
 
-pub (crate) mod mc_server {
+pub mod mc_server {
+    use std::path::Path;
+
     #[derive(Default)]
     pub struct Server {
         pub is_active: bool,
@@ -34,6 +36,9 @@ pub (crate) mod mc_server {
     }
 
     impl Server {
+        fn create_new_server(&mut self, server_name: String,install_directory:String){
+            let _ = std::fs::create_dir(Path::new(&install_directory).join(server_name)); // create a new dir
 
+        }
     }
 }

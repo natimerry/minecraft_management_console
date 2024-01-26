@@ -1,4 +1,4 @@
-mod server;
+pub mod server;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
