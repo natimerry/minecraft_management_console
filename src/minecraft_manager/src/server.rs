@@ -29,11 +29,6 @@ impl From<OsString> for ServerErrors {
 
 pub mod mc_server {
     use std::{io::{Cursor, Write}, path::Path};
-
-    use reqwest::Error;
-
-    use super::ServerErrors;
-
     #[derive(Default)]
     pub struct Server {
         pub is_active: bool,

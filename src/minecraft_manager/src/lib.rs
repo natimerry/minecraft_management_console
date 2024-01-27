@@ -130,7 +130,7 @@ impl McServerManager {
             .create(true)
             .open(&self.cache_file)
             .unwrap();
-        writeln!(file, "{}:{}", version, uri);
+        let _ = writeln!(file, "{}:{}", version, uri);
     }
     pub async fn get_available_versions(&mut self) -> Result<HashMap<String, String>, Error> {
         let response = reqwest::get("https://api.papermc.io/v2/projects/paper/")

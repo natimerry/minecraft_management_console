@@ -1,7 +1,6 @@
-use minecraft_manager::{self, McServerManager};
+use minecraft_manager::{self};
 use rocket::form::Form;
 use rocket::futures::SinkExt;
-use rocket::response::{stream, Redirect};
 use rocket::{self, form::FromForm, get, post};
 use rocket_dyn_templates::{context, Template};
 
@@ -21,12 +20,11 @@ pub struct NewServer {
     token: String,
 }
 
-#[get("/createserver/<version>/<name>/<description>", rank = 1)]
+#[get("/createserver/<version>/<name>", rank = 1)]
 pub fn ws_channel_create(
     ws: ws::WebSocket,
     version: String,
     name: String,
-    description: String,
 ) -> ws::Channel<'static> {
     let ws = ws.config(ws::Config {
         // set max message size to 3MiB
@@ -43,7 +41,7 @@ pub fn ws_channel_create(
                 .set_cache_directory("./cache.txt");
             mc_manager.create_new_server(&v, &name).await;
 
-            stream.send("DONE".into()).await;
+            let _ = stream.send("DONE".into()).await;
             Ok(())
         })
     })
@@ -55,7 +53,6 @@ pub async fn create_new_server(serverdata: Form<NewServer>) -> Template {
         "created",
         context! {
             name:serverdata.server_name.clone(),
-            description: serverdata.description.clone(),
         user_name: serverdata.user_name.clone(),
         token: serverdata.token.clone(),
         version: serverdata.version.clone()},

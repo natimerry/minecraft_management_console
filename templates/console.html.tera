@@ -13,8 +13,7 @@
                     <input type="text" name="server_name" placeholder="Server Name" aria-label="Server Name"
                         autocomplete="servername" required />
 
-                    <textarea onkeyup="textAreaAdjust(this)" class="textarea-resize" type="text" name="description" placeholder="Server description"
-                        aria-label="Server description" required></textarea>
+     
 
 
                     <details role="list">
@@ -100,13 +99,13 @@
         writeLog(evt.data);
     }
 
-
+    
     function writeLog(message) {
         console.log(message);
         var pre = document.getElementById("listbox");
         var html =
             "<li>\
-                <label for=\"small\">\
+                <label onclick=\"setradio(this)\" for=\"small\">\
                     <input type=\"radio\" name=\"version\" value=\"{message}\"> \
                     {message} \
                 </label> \
@@ -115,6 +114,11 @@
         pre.innerHTML += html;
 
     }
+
+    function setradio(msg){
+        document.getElementById("loader").innerText=msg.innerText;
+    }
+
     window.addEventListener("load", init, false);
 
 </script>
