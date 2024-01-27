@@ -4,6 +4,7 @@ use std::{
     collections::HashMap,
     fs::{self, ReadDir},
     io::Write,
+    path::Path,
 };
 
 use reqwest::Error;
@@ -48,7 +49,30 @@ impl McServerManager {
         self.directory = Some(directory.to_string());
         self
     }
+    pub async fn create_new_server(&mut self, version: &str, name: &str) {
+        let x = self.get_available_versions().await.unwrap();
+        let url = x.get(version).unwrap();
 
+        let mut new_server = Server {
+            ..Default::default()
+        };
+
+        let _ = new_server
+            .create_new_server(name, &self.directory.clone().unwrap(), url)
+            .await;
+
+        let mut _file = std::fs::OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open(
+                Path::new(&self.directory.clone().unwrap())
+                    .join(name)
+                    .join("version.txt"),
+            )
+            .unwrap()
+            .write_all(format!("{version}").as_bytes());
+
+        }
     pub fn set_cache_directory(mut self, file: &str) -> Self {
         self.cache_file = file.to_string();
         self
@@ -86,13 +110,19 @@ impl McServerManager {
         }
         Ok(())
     }
-    pub fn get_installations(&mut self) -> Result<Vec<String>, ServerErrors> {
+    pub fn get_installations(&mut self) -> Result<Vec<(String, String)>, ServerErrors> {
         self.update_installations()?;
         Ok(self
             .installations
             .keys()
-            .map(|entry| entry.rsplit("/").collect::<Vec<&str>>()[0].to_string())
-            .collect::<Vec<String>>())
+            .map(|entry| {
+                // each entry is a path
+                (
+                    dbg!(entry).rsplit("/").collect::<Vec<&str>>()[0].to_string(), // we get the directory name, i.e the server name
+                    std::fs::read_to_string(Path::new(entry).join("version.txt")).unwrap(), // read details.txt and store the version
+                )
+            })
+            .collect::<Vec<(String, String)>>())
     }
     fn add_to_cache(&self, version: &str, uri: &str) {
         let mut file: std::fs::File = std::fs::OpenOptions::new()

@@ -52,6 +52,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "async-lazy"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8537ff82429d7272fa9b4368466c064825d6763cfbe4f72857642d7d0852b59"
+dependencies = [
+ "tokio",
+]
+
+[[package]]
 name = "async-stream"
 version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -947,7 +956,9 @@ name = "minecraft_management_console"
 version = "0.1.0"
 dependencies = [
  "ansi-to-html",
+ "async-lazy",
  "minecraft_manager",
+ "parking_lot",
  "password_lib",
  "rocket",
  "rocket_dyn_templates",

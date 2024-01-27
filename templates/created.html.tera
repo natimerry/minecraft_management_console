@@ -1,0 +1,69 @@
+{% extends "base" %}
+{% block head %}
+    <link rel="stylesheet" href="css/authed.css" />
+    <!-- <link rel="stylesheet" href="css/login.css" /> -->
+{% endblock head %}
+{% block body %}
+<main class="container">
+    <article class="grid">
+      <div class="">
+        <hgroup>
+          <h1>Creating your server!</h1>
+          <p>We have created your server, please wait while the necessarry files are being downloaded!</p>
+        </hgroup>
+        <form action="/console" method="POST">
+          <input type="hidden" name="user_name" value="{{user_name}}">
+          <input type="hidden" name="token" value="{{token}}">
+          <button type="submit" aria-disabled="true" placeholder="Valid" aria-busy="true" id="create_button">Creating Server</button>
+        </form>
+      </div>
+    </article>
+  </main>
+  <script>
+    function textAreaAdjust(element) {
+    element.style.height = "1px";
+    element.style.height = (25+element.scrollHeight)+"px";
+  }
+    var receive_uri = "ws://127.0.0.1:8000/createserver/{{version}}/{{name}}/{{description}}";
+    function init() {
+        log = document.getElementById("listbox");
+        testWebSocket();
+
+
+    }
+
+    function testWebSocket() {
+        websocket = new WebSocket(receive_uri);
+        websocket.onopen = onOpen;
+        websocket.onclose = onClose;
+        websocket.onmessage = onMessage;
+    }
+
+    function onOpen(evt) {
+        // websocket.
+        console.log("CONNECTED TO WEBSOCKET");
+    }
+
+    function onClose(evt) {
+        console.log("Websocket DISCONNECTED");
+        document.getElementById("create_button").ariaBusy=false;
+        document.getElementById("create_button").ariaDisabled=false;
+        document.getElementById("create_button").innerText="Created server!";
+        // document.getElementById("loader").ariaBusy = false;
+        // var pre = document.getElementById("listbox").innerHTML+="<div></div>";
+    }
+
+    function onMessage(evt) {
+        writeLog(evt.data);
+    }
+
+
+    function writeLog(message) {
+        console.log(message);
+        // pre.innerHTML += html;
+
+    }
+    window.addEventListener("load", init, false);
+
+</script>
+{% endblock body %}

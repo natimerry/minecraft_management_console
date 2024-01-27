@@ -1,3 +1,8 @@
+use std::{
+    collections::HashMap,
+    fs::{self, ReadDir},
+    io::Write,
+};
 use std::{ffi::OsString, fmt};
 
 #[derive(Debug)]
@@ -22,10 +27,12 @@ impl From<OsString> for ServerErrors {
     }
 }
 
-
-
 pub mod mc_server {
-    use std::path::Path;
+    use std::{io::{Cursor, Write}, path::Path};
+
+    use reqwest::Error;
+
+    use super::ServerErrors;
 
     #[derive(Default)]
     pub struct Server {
@@ -34,11 +41,29 @@ pub mod mc_server {
         pub server_jar_path: Option<String>,
         pub installed_plugins: Vec<String>,
     }
-
+    type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
     impl Server {
-        fn create_new_server(&mut self, server_name: String,install_directory:String){
-            let _ = std::fs::create_dir(Path::new(&install_directory).join(server_name)); // create a new dir
+        pub async fn create_new_server(
+            &mut self,
+            server_name: &str,
+            install_directory: &str,
+            url: &str,
+        ) -> Result<()> {
+            let server_dir = Path::new(&install_directory).join(server_name);
+            let _ = std::fs::create_dir(&server_dir);
 
+            let mut file = std::fs::OpenOptions::new()
+                .append(true)
+                .create(true)
+                .open(server_dir.join("eula.txt"))
+                .unwrap()
+                .write_all(b"eula=true");
+
+            let response = dbg!(reqwest::get(url).await?);
+            let mut file = std::fs::File::create(server_dir.join("paper.jar"))?;
+            let mut content = Cursor::new(response.bytes().await?);
+            std::io::copy(&mut content, &mut file)?;
+            Ok(())
         }
     }
 }

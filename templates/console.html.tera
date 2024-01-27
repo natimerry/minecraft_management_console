@@ -23,8 +23,9 @@
                                 
                             </ul>
                     </details>
-
-                    <input type="submit">
+                    <input name="user_name" type="hidden" value="{{user_name}}">
+                    <input name="token" type="hidden" value="{{token}}">
+                    <button type="submit">Create a new server</button>
 
                 </form>
             </div>
@@ -39,9 +40,9 @@
                 </hgroup>
                 {% for server in servers %}
                 <hgroup>
-                    <h4>{{server}}</h4>
+                    <h4>{{server.0}}</h4>
                     <details>
-                        <summary>Some Server details</summary>
+                        <summary>{{server.1}}</summary>
                         <h6>
                             Server file acess
                         </h6>
@@ -53,7 +54,7 @@
 
                         <input type="text" placeholder="Email address">
                         <button class="outline">Add to whitelist</button>
-
+                      
                     </details>
                 </hgroup>
                 {% endfor %}

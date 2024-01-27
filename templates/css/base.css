@@ -13,15 +13,10 @@ body>main {
   justify-content: center;
   /* min-height: 100vh; */
   overflow: scroll;
-  /* -ms-overflow-style: none;   */
-  /* scrollbar-width: none;   */
-
   padding: 1rem 0;
 }
 
-body>main::-webkit-scrollbar{
-  /* display: none; */
-}
+
 
 article {
   padding: 0;
@@ -131,13 +126,16 @@ body>footer {
   --primary-inverse: #FFF;
 }
 
-[data-theme="dark"], button:hover{
+
+
+button:hover:not([data-theme="dark"]){
+  color: #FFF;
+}
+
+button:hover:not([data-theme="light"]){
   color: #000;
 }
 
-[data-theme="light"], button:hover{
-  color: #FFF;
-}
 /* Pink (Common styles) */
 :root {
   --form-element-active-border-color: var(--primary);
