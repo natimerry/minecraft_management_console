@@ -29,38 +29,39 @@
 
         </article>
 
-        <article>
-            <div>
-                <hgroup>
-                    <h1>List of created servers</h1>
-                    <p>Manage all the servers from this panel!</p>
-                </hgroup>
-                {% for server in servers %}
-                <hgroup>
-                    <h4 id="server_name">{{server.0}}</h4>
-                    <details>
-                        <summary id="server_status">{{server.1}} - Fetching staus..</summary>
-                        <h6>
-                            Server file acess
-                        </h6>
-                        <article class="container grid"">
-                            <button class="" style="--primary:#00897b" onclick="startServer({{loop.index0}})">Start</button>
-                            <button class="" style="--primary:#e53935" onclick="stopServer({{loop.index0}})">Stop</button>
-                        </article>
-                        <article class="container grid"">
-                                    <button class=" outline contrast">Server Console</button>
-                            <button class="outline contrast">Server Properties</button>
+        <article style="overflow-x: hidden;">
+            <div style="min-width: 200%;" class="details">
 
-                        </article>
+                <span style="max-width: 50vw; margin: auto; padding-right: 30px;">
+                    <hgroup>
+                        <h1>List of created servers</h1>
+                        <p>Manage all the servers from this panel!</p>
+                    </hgroup>
+                    {% for server in servers %}
+                    <hgroup>
+                        <h4 id="server_name">{{server.0}}</h4>
+                        <h6 class="detailer" id="server_status">{{server.1}} - Fetching staus..</h6>
+                    </hgroup>
+                </span>
 
-                        
+                <span style="max-width: 50vw; margin: auto; padding-left: 30px;">
+                    <h6 class="back">
+                        Server file acess
+                    </h6>
 
-                        <input type="text" placeholder="Email address">
-                        <button class="outline contrast">Add to whitelist</button>
+                    <article class="container grid">
+                        <button class="" style="--primary:#00897b" onclick="startServer({{loop.index0}})">Start</button>
+                        <button class="" style="--primary:#e53935" onclick="stopServer({{loop.index0}})">Stop</button>
+                    </article>
 
-                    </details>
-                </hgroup>
+                    <article class="container grid">
+                                <button class=" outline contrast">Server Console</button>
+                        <button class="outline contrast">Server Properties</button>
+                    </article>
+                    <input type="text" placeholder="Email address">
+                    <button class="outline contrast">Add to whitelist</button>
                 {% endfor %}
+                </span>
             </div>
         </article>
 

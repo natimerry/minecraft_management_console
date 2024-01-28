@@ -1,12 +1,12 @@
 .details {
     display:flex;
     flex-direction: row;
-    justify-content: left;
+    justify-content: center;
     /* overflow-x: scroll; */
-    padding: 0;
+    /* padding: 0; */
     transition: margin-left 1s
 }
 
 .hidden{
-    margin-left: -500px;
+    margin-left: -555px;
 }
