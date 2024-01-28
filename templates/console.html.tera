@@ -1,19 +1,20 @@
 {% extends "base" %}
 {% block head %}
+<link rel="stylesheet" href="css/base.css" />
 <link rel="stylesheet" href="css/console.css" />
 <!-- <link rel="stylesheet" href="css/login.css" /> -->
 {% endblock head %}
 {% block body %}
 <main class="container">
     <div class="grid">
-        <article class="alignmid">
+        <article>
             <div>
                 <form action="/create" method="post">
                     <h1>Create a new server </h1>
                     <input type="text" name="server_name" placeholder="Server Name" aria-label="Server Name"
                         autocomplete="servername" required />
 
-                    <textarea onkeyup="textAreaAdjust(this)" class="textarea-resize" type="text" name="description" placeholder="Server description"
+                    <textarea type="text" name="description" placeholder="Server description"
                         aria-label="Server description" required></textarea>
 
 
@@ -31,44 +32,49 @@
 
         </article>
 
-        <article>
-            <div>
-                <hgroup>
-                    <h1>List of created servers</h1>
-                    <p>Manage all the servers from this panel!</p>
-                </hgroup>
-                {% for server in servers %}
-                <hgroup>
-                    <h4>{{server}}</h4>
-                    <details>
-                        <summary>Some Server details</summary>
-                        <h6>
-                            Server file acess
-                        </h6>
-                        <article class="container grid"">
-                                    <button class=" outline contrast">Server Console</button>
-                            <button class="outline contrast">Server Properties</button>
-
-                        </article>
-
-                        <input type="text" placeholder="Email address">
-                        <button class="outline">Add to whitelist</button>
-
-                    </details>
-                </hgroup>
-                {% endfor %}
+        <article style="max-width: 555px; overflow-x: hidden;">
+            <div class="details" style="width: 1110px; max-height: 693.45px;">
+                <span style="min-width: 555x; padding: 50px;">
+                    <hgroup>
+                        <h1>List of created servers</h1>
+                        <p>Manage all the servers from this panel!</p>
+                    </hgroup>
+                    {% for server in servers %}
+                    <hgroup>
+                        <h4>{{server}}</h4>
+                        <h6 class="detailer">Some Server Details><hr></h6>
+                    </hgroup>
+                    {% endfor %}
+                </span>
+                <span style="min-width: 555px;  padding: 50px;">
+                    lol
+                    haha <p>funni lol</p>
+                    <h1>haha</h1>
+                    <h1 class="back">go back</h1>
+                </span>
             </div>
-
         </article>
 
 
     </div>
 </main>
 <script>
-    function textAreaAdjust(element) {
-    element.style.height = "1px";
-    element.style.height = (25+element.scrollHeight)+"px";
-  }
+    
+    const dets = document.querySelector(".details");
+    const detr = document.querySelectorAll(".detailer");
+    const bck = document.querySelector(".back");
+    detr.forEach(function(det){
+        det.addEventListener("click", () =>{
+            dets.classList.toggle("hidden");
+        });
+    });
+
+    bck.addEventListener("click", () => {
+        dets.classList.toggle("hidden");
+    });
+
+</script>
+<script>
     var receive_uri = "ws://127.0.0.1:8000/rx";
     function init() {
         log = document.getElementById("listbox");
@@ -92,7 +98,7 @@
     function onClose(evt) {
         console.log("Websocket DISCONNECTED");
         document.getElementById("loader").ariaBusy = false;
-        // var pre = document.getElementById("listbox").innerHTML+="<div></div>";
+        var pre = document.getElementById("listbox").innerHTML+="<div></div>";
     }
 
     function onMessage(evt) {
