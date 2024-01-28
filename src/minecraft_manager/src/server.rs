@@ -33,18 +33,23 @@ pub enum Status {
     StopFail(String),
 }
 pub mod mc_server {
-    use std::{ fs::File, io::{Cursor, Write}, path::{Path, PathBuf}
+    use std::{
+        fmt::format,
+        fs::File,
+        io::{Cursor, Write},
+        path::{Path, PathBuf},
     };
 
+    use super::Status;
     use serde::{Deserialize, Serialize};
     use sysinfo::{Pid, Signal};
-    use super::Status;
     #[derive(Default, Debug, Serialize, Deserialize)]
     pub struct Server {
         pub working_directory: String,
         pub properties_path: String,
         pub installed_plugins: Vec<String>,
         pub version: String,
+        port: i64,
         pid: usize,
         pub active: bool, // we use this in the webserver, the run/stop process doesnt care about this beyond updating it
     }
@@ -59,10 +64,10 @@ pub mod mc_server {
             let working_dir = Path::new(&self.working_directory);
             let s = sysinfo::System::new_all();
             if let Some(process) = s.process(Pid::from(self.pid)) {
-                if process.status() != sysinfo::ProcessStatus::Zombie{
-                    return Ok(Status::RunFail("LMAO DYING WTF?".to_string()))
+                if process.status() != sysinfo::ProcessStatus::Zombie {
+                    return Ok(Status::RunFail("LMAO DYING WTF?".to_string()));
                 };
-            }                                                         
+            }
 
             Command::new("bash")
                 .current_dir(working_dir)
@@ -75,7 +80,7 @@ pub mod mc_server {
             let command = Command::new("bash")
                 .current_dir(working_dir)
                 .arg("-c")
-                .arg("while [ 1 ] ; do cat input_fifo ; done | java -jar paper.jar --nogui > server_output")
+                .arg(format!("while [ 1 ] ; do cat input_fifo ; done | java -jar paper.jar --nogui --port {} > server_output",self.port))
                 .spawn()
                 .expect("failed to execute process");
 
@@ -121,6 +126,7 @@ pub mod mc_server {
         }
         pub async fn create_new_server(
             server_name: &str,
+            port: i64,
             install_directory: &str,
             url: &str,
         ) -> Result<Self> {
@@ -141,6 +147,7 @@ pub mod mc_server {
 
             let x = Server {
                 working_directory: server_dir.to_str().unwrap().to_string(),
+                port,
                 ..Default::default()
             };
             x.update_config();

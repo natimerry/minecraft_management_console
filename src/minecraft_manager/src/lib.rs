@@ -31,15 +31,22 @@ struct PaperVersionCommits {
 pub struct McServerManager {
     #[serde(skip)]
     json_location: String,
-
+    used_ports: Vec<i64>,
     directory: String,
     installations: Vec<String>,
-    cache_file: String,
     version_uri: HashMap<String, String>,
 }
 
 impl McServerManager {
-
+    pub fn update_config(&self) {
+        let json_data = serde_json::to_string_pretty(&self).unwrap();
+        let _ = std::fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(&self.json_location)
+            .unwrap()
+            .write_all(format!("{json_data}").as_bytes());
+    }
     pub fn new(json_file: Option<&str>) -> Self {
         let json_path: PathBuf;
         match json_file {
@@ -54,16 +61,26 @@ impl McServerManager {
         } else {
             let current_dir = fs::canonicalize(Path::new("./")).unwrap();
             let cache_file = current_dir.join("cache.txt").to_str().unwrap().to_string();
-            let directory = current_dir.join("minecraft_servers").to_str().unwrap().to_string();
+            let directory = current_dir
+                .join("minecraft_servers")
+                .to_str()
+                .unwrap()
+                .to_string();
 
             manager = Self {
-                cache_file,
                 directory,
                 json_location: json_path.to_str().unwrap().to_string(),
                 installations: vec![],
                 ..Default::default()
             };
 
+            // let json_data = serde_json::to_string_pretty(&manager).unwrap();
+            // let _ = std::fs::OpenOptions::new()
+            //     .write(true)
+            //     .create(true)
+            //     .open(json_path)
+            //     .unwrap()
+            //     .write_all(format!("{json_data}").as_bytes());
             let json_data = serde_json::to_string_pretty(&manager).unwrap();
             let _ = std::fs::OpenOptions::new()
                 .write(true)
@@ -82,8 +99,16 @@ impl McServerManager {
         let x = self.get_available_versions().await.unwrap();
         let url = x.get(version).unwrap();
 
-        let _ = Server::create_new_server(name, &self.directory.clone(), url).await;
+        let port: i64;
+        match self.used_ports.last() {
+            Some(p) => port = *p - 1,
+            None => port = 25565,
+        }
 
+        let _ = Server::create_new_server(name, port, &self.directory.clone(), url).await;
+
+        self.used_ports.push(port);
+        dbg!(&self.used_ports);
         let mut _file = std::fs::OpenOptions::new()
             .append(true)
             .create(true)
@@ -94,6 +119,7 @@ impl McServerManager {
             )
             .unwrap()
             .write_all(format!("{version}").as_bytes());
+        self.update_config();
     }
 
     fn update_installations(&mut self) -> Result<(), ServerErrors> {
@@ -128,13 +154,10 @@ impl McServerManager {
             })
             .collect::<Vec<(String, String)>>())
     }
-    fn add_to_cache(&self, version: &str, uri: &str) {
-        let mut file: std::fs::File = std::fs::OpenOptions::new()
-            .append(true)
-            .create(true)
-            .open(&self.cache_file)
-            .unwrap();
-        let _ = writeln!(file, "{}:{}", version, uri);
+    fn add_to_cache(&mut self, version: &str, uri: &str) {
+        self.version_uri
+            .insert(version.to_string(), uri.to_string());
+        self.update_config();
     }
     pub async fn get_available_versions(&mut self) -> Result<HashMap<String, String>, Error> {
         let response = reqwest::get("https://api.papermc.io/v2/projects/paper/")
@@ -143,16 +166,7 @@ impl McServerManager {
             .await;
         match response {
             Ok(parsed) => {
-                let cached_builds = std::fs::read_to_string(&self.cache_file)
-                    .unwrap()
-                    .lines()
-                    .map(|line| {
-                        let entry = line
-                            .split_once(':')
-                            .expect("Infallible state reached. Cant split db entry");
-                        (entry.0.to_string(), entry.1.to_string())
-                    })
-                    .collect::<HashMap<String, String>>();
+                let cached_builds = self.version_uri.clone();
                 // get latest version
                 let latest_verison = parsed.versions.last().unwrap().clone();
 
@@ -187,6 +201,7 @@ impl McServerManager {
                 return Err(dbg!(e));
             }
         }
+        self.update_config();
         Ok(self.version_uri.clone())
     }
 
@@ -196,23 +211,20 @@ impl McServerManager {
         dbg!(server.run_self().await.unwrap());
     }
 
-
     pub async fn stop_server(&self, name: &str) {
         let mut server = self.load_server(name);
 
         dbg!(server.stop_self().await.unwrap());
     }
 
-    fn load_server(&self,name: &str) -> Server{
+    fn load_server(&self, name: &str) -> Server {
         let workingdir = Path::new(&self.directory.clone()).join(name);
         Server::load(workingdir)
     }
-    pub fn get_server_status(&self,name: &str) -> bool{
+    pub fn get_server_status(&self, name: &str) -> bool {
         let server = self.load_server(name);
         server.active
     }
-
-
 }
 
 async fn get_latest_commit(version: &str) -> Result<String, reqwest::Error> {
