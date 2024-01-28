@@ -1,8 +1,12 @@
-.center_contents{
-    /* justify-content: center; */
-    /* margin: auto; */
+.details {
+    display:flex;
+    flex-direction: row;
+    justify-content: left;
+    /* overflow-x: scroll; */
+    padding: 0;
+    transition: margin-left 1s
 }
 
-div {
-    overflow: hidden;
+.hidden{
+    margin-left: -500px;
 }

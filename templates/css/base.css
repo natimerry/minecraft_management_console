@@ -7,20 +7,26 @@ body{
 }
 body>main {
   margin-bottom: auto;
-  /* margin-top: auto;   */
+  margin-top: auto;  
   display: flex;
   flex-direction: column;
   justify-content: center;
   /* min-height: 100vh; */
   overflow: scroll;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
   padding: 1rem 0;
 }
 
-
+body>main::-webkit-scrollbar{
+  /* display: none; */
+}
 
 article {
   padding: 0;
-  overflow: scroll;
+  overflow: visible;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 article div {

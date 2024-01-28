@@ -1,12 +1,13 @@
 {% extends "base" %}
 {% block head %}
+<link rel="stylesheet" href="css/base.css" />
 <link rel="stylesheet" href="css/console.css" />
 <!-- <link rel="stylesheet" href="css/login.css" /> -->
 {% endblock head %}
 {% block body %}
 <main class="container">
     <div class="grid">
-        <article class="alignmid">
+        <article>
             <div>
                 <form action="/create" method="post">
                     <h1>Create a new server </h1>
@@ -61,7 +62,6 @@
                 </hgroup>
                 {% endfor %}
             </div>
-
         </article>
 
 
@@ -69,4 +69,69 @@
 </main>
 <script src="js/getupdated_verisons.js"></script> 
 
+<script>
+    
+    const dets = document.querySelector(".details");
+    const detr = document.querySelectorAll(".detailer");
+    const bck = document.querySelector(".back");
+    detr.forEach(function(det){
+        det.addEventListener("click", () =>{
+            dets.classList.toggle("hidden");
+        });
+    });
+
+    bck.addEventListener("click", () => {
+        dets.classList.toggle("hidden");
+    });
+
+</script>
+<script>
+    var receive_uri = "ws://127.0.0.1:8000/rx";
+    function init() {
+        log = document.getElementById("listbox");
+        testWebSocket();
+
+
+    }
+
+    function testWebSocket() {
+        websocket = new WebSocket(receive_uri);
+        websocket.onopen = onOpen;
+        websocket.onclose = onClose;
+        websocket.onmessage = onMessage;
+    }
+
+    function onOpen(evt) {
+        // writeLog("CONNECTED");
+        console.log("CONNECTED TO WEBSOCKET");
+    }
+
+    function onClose(evt) {
+        console.log("Websocket DISCONNECTED");
+        document.getElementById("loader").ariaBusy = false;
+        var pre = document.getElementById("listbox").innerHTML+="<div></div>";
+    }
+
+    function onMessage(evt) {
+        writeLog(evt.data);
+    }
+
+
+    function writeLog(message) {
+        console.log(message);
+        var pre = document.getElementById("listbox");
+        var html =
+            "<li>\
+                <label for=\"small\">\
+                    <input type=\"radio\" name=\"version\" value=\"{message}\"> \
+                    {message} \
+                </label> \
+            </li>".replaceAll("\n","").replaceAll("{message}", message);
+        console.log(html);
+        pre.innerHTML += html;
+
+    }
+    window.addEventListener("load", init, false);
+
+</script>
 {% endblock body %}
