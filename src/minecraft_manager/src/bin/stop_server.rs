@@ -2,14 +2,8 @@ use minecraft_manager::server::{mc_server::Server};
 
 #[tokio::main]
 async fn main() -> Result<(), ()> {
-    let mut _server = Server {
-        working_directory: "./mc/pvp_server".to_string(),
-        ..Default::default()
-    };
+    let mut mc_manager = minecraft_manager::McServerManager::new(Some("../../mc_server_manager.json"));
 
-
-
-    dbg!(_server.stop_self().await);
-
+    mc_manager.stop_server("pvp_server").await;
     Ok(())
 }

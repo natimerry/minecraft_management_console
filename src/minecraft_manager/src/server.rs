@@ -23,7 +23,7 @@ impl From<OsString> for ServerErrors {
         ServerErrors::FsError(format!("Unable to convert to UTF-8 string: {:?}", value))
     }
 }
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Status {
     CreateOk,
     CreateFail(String),
@@ -40,18 +40,28 @@ pub mod mc_server {
         path::{Path, PathBuf},
     };
 
+    use serde::{Deserialize, Serialize};
     use sysinfo::Signal;
 
+    use crate::server;
+
     use super::Status;
-    #[derive(Default, Debug)]
+    #[derive(Default, Debug, Serialize, Deserialize)]
     pub struct Server {
         pub working_directory: String,
-        pub properties_path: Option<String>,
+        pub properties_path: String,
         pub installed_plugins: Vec<String>,
+        pub version: String,
+        pid: usize,
     }
     use std::process::Command;
     type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
     impl Server {
+        pub fn load(path:PathBuf) -> Self{
+            serde_json::from_str(
+                &std::fs::read_to_string(path.join("server_data.json")).unwrap(),
+            ).unwrap()
+        }
         pub async fn run_self(&mut self) -> Result<Status> {
             let working_dir = Path::new(&self.working_directory);
             let pid_file = working_dir.join("process_id");
@@ -83,22 +93,14 @@ pub mod mc_server {
 
             pid = command.id();
 
-            let _file = std::fs::OpenOptions::new()
-                .write(true)
-                .create(true)
-                .open(pid_file)
-                .unwrap()
-                .write_all(pid.to_string().as_bytes());
+            self.pid = pid as usize;
+            self.update_config();
 
             Ok(Status::RunOk)
         }
 
         pub async fn stop_self(&mut self) -> Result<Status> {
-            let working_dir = Path::new(&self.working_directory);
-            let pid_file = working_dir.join("process_id");
-            let p = dbg!(std::fs::read_to_string(&pid_file)).unwrap();
-
-            if !pid_file.exists() || !Path::new("/proc/").join(p.clone()).exists() {
+            if !Path::new("/proc/").join(self.pid.to_string()).exists() {
                 return Ok(dbg!(Status::StopFail("Program isnt running".to_string())));
             }
 
@@ -113,43 +115,22 @@ pub mod mc_server {
             use sysinfo::{Pid, System};
 
             let s = System::new_all();
-            if let Some(process) = s.process(Pid::from(p.parse::<usize>().unwrap())) {
+            if let Some(process) = s.process(Pid::from(self.pid)) {
                 process.kill_with(Signal::Term);
             }
             Ok(Status::StopOk)
         }
 
-        pub fn new(dir: PathBuf) -> Self {
-            let mut properties: Option<String> = None;
-            let working_dir = Path::new(&dir);
-
-            dbg!(&dir);
-
-            for file_path in std::fs::read_dir(working_dir).unwrap() {
-                let file_path_string = file_path
-                    .unwrap()
-                    .path()
-                    .into_os_string()
-                    .into_string()
-                    .unwrap_or("".to_string());
-
-                let file = file_path_string.rsplit("/").collect::<Vec<&str>>()[0];
-
-                match file {
-                    "server.properties" => properties = Some(file_path_string.to_string()),
-                    _ => (),
-                }
-            }
-            let server = Server {
-                properties_path: properties,
-                working_directory: dir.to_str().unwrap().to_string(),
-                ..Default::default()
-            };
-            server
+        fn update_config(&self) {
+            let json_data = serde_json::to_string_pretty(&self).unwrap();
+            let _file = std::fs::OpenOptions::new()
+                .write(true)
+                .create(true)
+                .open(Path::new(&self.working_directory).join("server_data.json"))
+                .unwrap()
+                .write_all(format!("{json_data}").as_bytes());
         }
-
         pub async fn create_new_server(
-            // self
             server_name: &str,
             install_directory: &str,
             url: &str,
@@ -169,10 +150,12 @@ pub mod mc_server {
             let mut content = Cursor::new(response.bytes().await?);
             std::io::copy(&mut content, &mut file)?;
 
-            Ok(Server {
+            let x = Server {
                 working_directory: server_dir.to_str().unwrap().to_string(),
                 ..Default::default()
-            })
+            };
+            x.update_config();
+            Ok(x)
         }
     }
 }

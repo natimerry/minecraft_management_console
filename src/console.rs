@@ -14,7 +14,6 @@ struct Token {
 #[derive(FromForm)]
 pub struct NewServer {
     server_name: String,
-    description: String,
     version: String,
     user_name: String,
     token: String,
@@ -36,11 +35,8 @@ pub fn ws_channel_create(
         let v = version.to_string().clone();
         let name = name.to_string().clone();
         Box::pin(async move {
-            let mut mc_manager = minecraft_manager::McServerManager::new()
-                .set_directory("./src/minecraft_manager/mc")
-                .set_cache_directory("./cache.txt");
+            let mut mc_manager = minecraft_manager::McServerManager::new(None);
             mc_manager.create_new_server(&v, &name).await;
-
             let _ = stream.send("DONE".into()).await;
             Ok(())
         })
@@ -65,7 +61,7 @@ pub async fn console_page(token: Form<Token>) -> Template {
     let user_name = token.user_name.clone();
     let token = token.token.clone();
     let mut mc_manager =
-        minecraft_manager::McServerManager::new().set_directory("./src/minecraft_manager/mc");
+        minecraft_manager::McServerManager::new(None);
 
     let servers = mc_manager.get_installations().unwrap();
     // let names = servers.iter().map(|entry| entry.0.clone()).collect::<Vec<String>>();
@@ -84,8 +80,7 @@ pub fn tx_channel(ws: ws::WebSocket) -> ws::Channel<'static> {
 
     ws.channel(move |mut stream| {
         Box::pin(async move {
-            let mut versions = minecraft_manager::McServerManager::new()
-                .set_cache_directory("./cache.txt")
+            let mut versions = minecraft_manager::McServerManager::new(None)
                 .get_available_versions()
                 .await
                 .unwrap()

@@ -4,7 +4,7 @@ use std::{
     collections::HashMap,
     fs::{self, ReadDir},
     io::Write,
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 use reqwest::Error;
@@ -27,99 +27,103 @@ struct PaperVersionCommits {
     version: String,
 }
 
-#[derive(Default)]
+#[derive(Default, Deserialize, Serialize)]
 pub struct McServerManager {
-    directory: Option<String>,
-    installations: HashMap<String, Server>,
-    plugins: Vec<String>,
+    #[serde(skip)]
+    json_location: String,
+
+    directory: String,
+    installations: Vec<String>,
     cache_file: String,
-    version_uri: HashMap<String, String>, // map of version:versionURI
+    version_uri: HashMap<String, String>,
 }
 
 impl McServerManager {
-    pub fn new() -> Self {
-        Self {
-            directory: None,
-            installations: HashMap::new(),
-            plugins: vec![],
-            ..Default::default()
+
+    pub fn new(json_file: Option<&str>) -> Self {
+        let json_path: PathBuf;
+        match json_file {
+            Some(path) => json_path = Path::new(&path).to_path_buf(),
+            None => json_path = Path::new("./").join("mc_server_manager.json").to_path_buf(),
         }
+
+        let mut manager: McServerManager;
+        if json_path.exists() {
+            manager = serde_json::from_str(&std::fs::read_to_string(&json_path).unwrap()).unwrap();
+            manager.json_location = json_path.to_str().unwrap().to_string();
+        } else {
+            let current_dir = fs::canonicalize(Path::new("./")).unwrap();
+            let cache_file = current_dir.join("cache.txt").to_str().unwrap().to_string();
+            let directory = current_dir.join("minecraft_servers").to_str().unwrap().to_string();
+
+            manager = Self {
+                cache_file,
+                directory,
+                json_location: json_path.to_str().unwrap().to_string(),
+                installations: vec![],
+                ..Default::default()
+            };
+
+            let json_data = serde_json::to_string_pretty(&manager).unwrap();
+            let _ = std::fs::OpenOptions::new()
+                .write(true)
+                .create(true)
+                .open(json_path)
+                .unwrap()
+                .write_all(format!("{json_data}").as_bytes());
+        }
+        if !Path::new(&manager.directory).exists() {
+            std::fs::create_dir(&manager.directory);
+        }
+        manager
     }
-    pub fn set_directory(mut self, directory: &str) -> Self {
-        self.directory = Some(directory.to_string());
-        self
-    }
+
     pub async fn create_new_server(&mut self, version: &str, name: &str) {
         let x = self.get_available_versions().await.unwrap();
         let url = x.get(version).unwrap();
 
-        let mut new_server = Server {
-            ..Default::default()
-        };
-
-        let _ = new_server
-            .create_new_server(name, &self.directory.clone().unwrap(), url)
-            .await;
+        let _ = Server::create_new_server(name, &self.directory.clone(), url).await;
 
         let mut _file = std::fs::OpenOptions::new()
             .append(true)
             .create(true)
             .open(
-                Path::new(&self.directory.clone().unwrap())
+                Path::new(&self.directory.clone())
                     .join(name)
                     .join("version.txt"),
             )
             .unwrap()
             .write_all(format!("{version}").as_bytes());
-
-        }
-    pub fn set_cache_directory(mut self, file: &str) -> Self {
-        self.cache_file = file.to_string();
-        self
     }
+
     fn update_installations(&mut self) -> Result<(), ServerErrors> {
-        let paths: ReadDir;
-        match &self.directory {
-            Some(dir) => paths = fs::read_dir(&dir)?,
-            None => paths = fs::read_dir("./mc")?,
-        }
+        let paths: ReadDir = fs::read_dir(&self.directory)?;
 
         for path in paths {
-            let directory = dbg!(path?);
-            let files_in_dir = fs::read_dir(directory.path())?;
-            let mut new_server = Server {
-                ..Server::default()
-            };
-            for file_path in files_in_dir {
-                let file_path_string = file_path?.path().into_os_string().into_string()?;
-
-                let file = dbg!(file_path_string.rsplit("/").collect::<Vec<&str>>()[0]);
-
-                match file {
-                    "paper.jar" => new_server.server_jar_path = Some(file_path_string.clone()),
-                    "server.properties" => {
-                        new_server.properties_path = Some(file_path_string.clone())
-                    }
-                    ".lock" => new_server.is_active = true,
-                    _ => (),
-                }
-            }
-
+            let directory = path?;
+            // let new_server = Server::new(directory.path());
+            let new_server: Server = Server::load(directory.path());
             self.installations
-                .insert(directory.path().into_os_string().into_string()?, new_server);
+                .push(directory.path().into_os_string().into_string()?);
         }
         Ok(())
     }
     pub fn get_installations(&mut self) -> Result<Vec<(String, String)>, ServerErrors> {
         self.update_installations()?;
+
         Ok(self
             .installations
-            .keys()
-            .map(|entry| {
-                // each entry is a path
+            .iter()
+            .map(|server| {
+                let server_path = Path::new(server);
                 (
-                    dbg!(entry).rsplit("/").collect::<Vec<&str>>()[0].to_string(), // we get the directory name, i.e the server name
-                    std::fs::read_to_string(Path::new(entry).join("version.txt")).unwrap(), // read details.txt and store the version
+                    server_path
+                        .file_name()
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .to_string(),
+                    std::fs::read_to_string(server_path.join("version.txt")).unwrap(),
                 )
             })
             .collect::<Vec<(String, String)>>())
@@ -160,7 +164,7 @@ impl McServerManager {
                     if cached_builds.contains_key(&version) {
                         self.version_uri.insert(
                             version.clone(),
-                            dbg!(cached_builds.get(&version).unwrap().to_string()),
+                            cached_builds.get(&version).unwrap().to_string(),
                         );
                     } else {
                         let latest_commit = get_latest_commit(&version).await?;
@@ -185,20 +189,35 @@ impl McServerManager {
         }
         Ok(self.version_uri.clone())
     }
+
+    pub async fn run_server(&self, name: &str) {
+        let workingdir = Path::new(&self.directory.clone()).join(name);
+
+        let mut server = Server::load(workingdir);
+        server.run_self().await.unwrap();
+    }
+
+
+    pub async fn stop_server(&self, name: &str) {
+        let workingdir = Path::new(&self.directory.clone()).join(name);
+
+        let mut server = Server::load(workingdir);
+        server.stop_self().await.unwrap();
+    }
 }
 
 async fn get_latest_commit(version: &str) -> Result<String, reqwest::Error> {
-    let response = reqwest::get(dbg!(format!(
+    let response = reqwest::get(format!(
         "https://api.papermc.io/v2/projects/paper/versions/{}",
         version
-    )))
+    ))
     .await?
     .json::<PaperVersionCommits>()
     .await;
 
     match response {
         Ok(parsed) => {
-            dbg!(&parsed);
+            &parsed;
             let final_commit = parsed.builds.last().unwrap();
             return Ok(final_commit.to_string());
         }
