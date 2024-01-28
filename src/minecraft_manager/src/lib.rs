@@ -191,19 +191,28 @@ impl McServerManager {
     }
 
     pub async fn run_server(&self, name: &str) {
-        let workingdir = Path::new(&self.directory.clone()).join(name);
+        let mut server = self.load_server(name);
 
-        let mut server = Server::load(workingdir);
-        server.run_self().await.unwrap();
+        dbg!(server.run_self().await.unwrap());
     }
 
 
     pub async fn stop_server(&self, name: &str) {
-        let workingdir = Path::new(&self.directory.clone()).join(name);
+        let mut server = self.load_server(name);
 
-        let mut server = Server::load(workingdir);
-        server.stop_self().await.unwrap();
+        dbg!(server.stop_self().await.unwrap());
     }
+
+    fn load_server(&self,name: &str) -> Server{
+        let workingdir = Path::new(&self.directory.clone()).join(name);
+        Server::load(workingdir)
+    }
+    pub fn get_server_status(&self,name: &str) -> bool{
+        let server = self.load_server(name);
+        server.active
+    }
+
+
 }
 
 async fn get_latest_commit(version: &str) -> Result<String, reqwest::Error> {

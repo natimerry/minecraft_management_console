@@ -11,6 +11,9 @@ use std::env;
 
 mod login;
 mod console;
+mod manageserver;
+
+use manageserver::*;
 use login::*;
 use console::{console_page, create_new_server, tx_channel,*};
 
@@ -21,4 +24,5 @@ fn rocket() -> _ {
         .mount("/", FileServer::from(relative!("templates")))
         .mount("/", routes![login_page,login_auth,registered]) // auth
         .mount("/", routes![console_page,tx_channel,create_new_server,ws_channel_create]) // console
+        .mount("/", routes![ws_server_status,ws_server_start,ws_server_stop])
 }

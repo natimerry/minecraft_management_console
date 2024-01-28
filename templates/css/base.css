@@ -136,6 +136,15 @@ button:hover:not([data-theme="light"]){
   color: #000;
 }
 
+
+.outline:hover:not([data-theme="dark"]){
+  color: #810CA8;
+}
+
+.outline:hover:not([data-theme="light"]){
+  color: #810CA8;
+}
+
 /* Pink (Common styles) */
 :root {
   --form-element-active-border-color: var(--primary);

@@ -13,14 +13,11 @@
                     <input type="text" name="server_name" placeholder="Server Name" aria-label="Server Name"
                         autocomplete="servername" required />
 
-     
-
-
                     <details role="list">
                         <summary id="loader" aria-busy="true" aria-haspopup="listbox">Select Version</summary>
-                            <ul id="listbox" class="radio-select" role="listbox">
-                                
-                            </ul>
+                        <ul id="listbox" class="radio-select" role="listbox">
+
+                        </ul>
                     </details>
                     <input name="user_name" type="hidden" value="{{user_name}}">
                     <input name="token" type="hidden" value="{{token}}">
@@ -39,21 +36,27 @@
                 </hgroup>
                 {% for server in servers %}
                 <hgroup>
-                    <h4>{{server.0}}</h4>
+                    <h4 id="server_name">{{server.0}}</h4>
                     <details>
-                        <summary>{{server.1}}</summary>
+                        <summary id="server_status">{{server.1}} - Fetching staus..</summary>
                         <h6>
                             Server file acess
                         </h6>
+                        <article class="container grid"">
+                            <button class="" style="--primary:#00897b" onclick="startServer({{loop.index0}})">Start</button>
+                            <button class="" style="--primary:#e53935" onclick="stopServer({{loop.index0}})">Stop</button>
+                        </article>
                         <article class="container grid"">
                                     <button class=" outline contrast">Server Console</button>
                             <button class="outline contrast">Server Properties</button>
 
                         </article>
 
+                        
+
                         <input type="text" placeholder="Email address">
-                        <button class="outline">Add to whitelist</button>
-                      
+                        <button class="outline contrast">Add to whitelist</button>
+
                     </details>
                 </hgroup>
                 {% endfor %}
@@ -64,62 +67,6 @@
 
     </div>
 </main>
-<script>
-    function textAreaAdjust(element) {
-    element.style.height = "1px";
-    element.style.height = (25+element.scrollHeight)+"px";
-  }
-    var receive_uri = "ws://127.0.0.1:8000/rx";
-    function init() {
-        log = document.getElementById("listbox");
-        testWebSocket();
+<script src="js/getupdated_verisons.js"></script> 
 
-
-    }
-
-    function testWebSocket() {
-        websocket = new WebSocket(receive_uri);
-        websocket.onopen = onOpen;
-        websocket.onclose = onClose;
-        websocket.onmessage = onMessage;
-    }
-
-    function onOpen(evt) {
-        // writeLog("CONNECTED");
-        console.log("CONNECTED TO WEBSOCKET");
-    }
-
-    function onClose(evt) {
-        console.log("Websocket DISCONNECTED");
-        document.getElementById("loader").ariaBusy = false;
-        // var pre = document.getElementById("listbox").innerHTML+="<div></div>";
-    }
-
-    function onMessage(evt) {
-        writeLog(evt.data);
-    }
-
-    
-    function writeLog(message) {
-        console.log(message);
-        var pre = document.getElementById("listbox");
-        var html =
-            "<li>\
-                <label onclick=\"setradio(this)\" for=\"small\">\
-                    <input type=\"radio\" name=\"version\" value=\"{message}\"> \
-                    {message} \
-                </label> \
-            </li>".replaceAll("\n","").replaceAll("{message}", message);
-        console.log(html);
-        pre.innerHTML += html;
-
-    }
-
-    function setradio(msg){
-        document.getElementById("loader").innerText=msg.innerText;
-    }
-
-    window.addEventListener("load", init, false);
-
-</script>
 {% endblock body %}

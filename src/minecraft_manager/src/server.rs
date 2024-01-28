@@ -33,18 +33,11 @@ pub enum Status {
     StopFail(String),
 }
 pub mod mc_server {
-    use std::{
-        fs::File,
-        io::{Cursor, Write},
-        os::unix::raw::pid_t,
-        path::{Path, PathBuf},
+    use std::{ fs::File, io::{Cursor, Write}, path::{Path, PathBuf}
     };
 
     use serde::{Deserialize, Serialize};
-    use sysinfo::Signal;
-
-    use crate::server;
-
+    use sysinfo::{Pid, Signal};
     use super::Status;
     #[derive(Default, Debug, Serialize, Deserialize)]
     pub struct Server {
@@ -53,28 +46,23 @@ pub mod mc_server {
         pub installed_plugins: Vec<String>,
         pub version: String,
         pid: usize,
+        pub active: bool, // we use this in the webserver, the run/stop process doesnt care about this beyond updating it
     }
     use std::process::Command;
     type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
     impl Server {
-        pub fn load(path:PathBuf) -> Self{
-            serde_json::from_str(
-                &std::fs::read_to_string(path.join("server_data.json")).unwrap(),
-            ).unwrap()
+        pub fn load(path: PathBuf) -> Self {
+            serde_json::from_str(&std::fs::read_to_string(path.join("server_data.json")).unwrap())
+                .unwrap()
         }
         pub async fn run_self(&mut self) -> Result<Status> {
             let working_dir = Path::new(&self.working_directory);
-            let pid_file = working_dir.join("process_id");
-
-            let mut pid: u32 = 0;
-            if pid_file.exists() {
-                let p = dbg!(std::fs::read_to_string(&pid_file)).unwrap();
-                if Path::new("/proc/").join(p).exists() {
-                    return Ok(dbg!(Status::RunFail(
-                        "PROGRAM IS ALREADY RUNNING".to_string()
-                    )));
-                }
-            }
+            let s = sysinfo::System::new_all();
+            if let Some(process) = s.process(Pid::from(self.pid)) {
+                if process.status() != sysinfo::ProcessStatus::Zombie{
+                    return Ok(Status::RunFail("LMAO DYING WTF?".to_string()))
+                };
+            }                                                         
 
             Command::new("bash")
                 .current_dir(working_dir)
@@ -91,19 +79,18 @@ pub mod mc_server {
                 .spawn()
                 .expect("failed to execute process");
 
-            pid = command.id();
-
-            self.pid = pid as usize;
+            self.active = true;
+            self.pid = command.id() as usize;
             self.update_config();
 
             Ok(Status::RunOk)
         }
 
         pub async fn stop_self(&mut self) -> Result<Status> {
-            if !Path::new("/proc/").join(self.pid.to_string()).exists() {
-                return Ok(dbg!(Status::StopFail("Program isnt running".to_string())));
+            let s = System::new_all();
+            if let Some(process) = s.process(Pid::from(self.pid)) {
+                println!("{:?}", process.status());
             }
-
             let mut file: std::fs::File = std::fs::OpenOptions::new()
                 .write(true)
                 .open(Path::new(&self.working_directory).join("input_fifo"))
@@ -114,10 +101,12 @@ pub mod mc_server {
             // WE NEED TO RELEASE THE PID FROM THE PROCESS TABLE
             use sysinfo::{Pid, System};
 
-            let s = System::new_all();
             if let Some(process) = s.process(Pid::from(self.pid)) {
-                process.kill_with(Signal::Term);
+                process.kill();
+                process.wait();
             }
+            self.active = false;
+            self.update_config();
             Ok(Status::StopOk)
         }
 
