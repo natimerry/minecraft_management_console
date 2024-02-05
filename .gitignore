@@ -1,5 +1,6 @@
 /target
 /src/minecraft_manager/mc/*
 /minecraft_servers
-mc_server_manager.json
-mc_server_manager.json
+./mc_server_manager.json
+/mc_server_manager.json
+/.vscode
