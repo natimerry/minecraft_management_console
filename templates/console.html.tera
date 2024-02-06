@@ -30,7 +30,7 @@
         </article>
 
         <article style="overflow-x: hidden;">
-            <div style="min-width: 200%;" class="details">
+            <div style="max-height: 694px; min-width: 200%; overflow-y: scroll;" class="details">
 
                 <span style="max-width: 50vw; margin: auto; padding-right: 30px;">
                     <hgroup>
@@ -39,9 +39,10 @@
                     </hgroup>
                     {% for server in servers %}
                     <hgroup>
-                        <h4 id="server_name">{{server.0}}</h4>
-                        <h6 class="detailer" id="server_status">{{server.1}} - Fetching staus..</h6>
+                        <h4 class="detailer" id="server_name">{{server.0}}</h4>
+                        <h6 id="server_status">{{server.1}} - Fetching staus..</h6>
                     </hgroup>
+                    {% endfor %}
                 </span>
 
                 <span style="max-width: 50vw; margin: auto; padding-left: 30px;">
@@ -50,8 +51,8 @@
                     </h6>
 
                     <article class="container grid">
-                        <button class="" style="--primary:#00897b" onclick="startServer({{loop.index0}})">Start</button>
-                        <button class="" style="--primary:#e53935" onclick="stopServer({{loop.index0}})">Stop</button>
+                        <button id="start_button" class="" style="--primary:#00897b" aria-valuetext="" onclick="startServer(this)">Start</button>
+                        <button id="stop_button" style="--primary:#e53935" aria-valuetext="" onclick="stopServer(this)">Stop</button>
                     </article>
 
                     <article class="container grid">
@@ -60,7 +61,6 @@
                     </article>
                     <input type="text" placeholder="Email address">
                     <button class="outline contrast">Add to whitelist</button>
-                {% endfor %}
                 </span>
             </div>
         </article>
@@ -68,16 +68,16 @@
 
     </div>
 </main>
-<script src="js/getupdated_verisons.js"></script> 
 
 <script>
-    
     const dets = document.querySelector(".details");
     const detr = document.querySelectorAll(".detailer");
     const bck = document.querySelector(".back");
     detr.forEach(function(det){
         det.addEventListener("click", () =>{
             dets.classList.toggle("hidden");
+            document.getElementById("start_button").ariaValueText=det.innerHTML;
+            document.getElementById("stop_button").ariaValueText=det.innerHTML;
         });
     });
 
@@ -86,53 +86,5 @@
     });
 
 </script>
-<script>
-    var receive_uri = "ws://127.0.0.1:8000/rx";
-    function init() {
-        log = document.getElementById("listbox");
-        testWebSocket();
-
-
-    }
-
-    function testWebSocket() {
-        websocket = new WebSocket(receive_uri);
-        websocket.onopen = onOpen;
-        websocket.onclose = onClose;
-        websocket.onmessage = onMessage;
-    }
-
-    function onOpen(evt) {
-        // writeLog("CONNECTED");
-        console.log("CONNECTED TO WEBSOCKET");
-    }
-
-    function onClose(evt) {
-        console.log("Websocket DISCONNECTED");
-        document.getElementById("loader").ariaBusy = false;
-        var pre = document.getElementById("listbox").innerHTML+="<div></div>";
-    }
-
-    function onMessage(evt) {
-        writeLog(evt.data);
-    }
-
-
-    function writeLog(message) {
-        console.log(message);
-        var pre = document.getElementById("listbox");
-        var html =
-            "<li>\
-                <label for=\"small\">\
-                    <input type=\"radio\" name=\"version\" value=\"{message}\"> \
-                    {message} \
-                </label> \
-            </li>".replaceAll("\n","").replaceAll("{message}", message);
-        console.log(html);
-        pre.innerHTML += html;
-
-    }
-    window.addEventListener("load", init, false);
-
-</script>
+<script src="js/getupdated_verisons.js"></script>
 {% endblock body %}

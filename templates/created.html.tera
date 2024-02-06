@@ -14,7 +14,10 @@
         <form action="/console" method="POST">
           <input type="hidden" name="user_name" value="{{user_name}}">
           <input type="hidden" name="token" value="{{token}}">
-          <button type="submit" aria-disabled="true" placeholder="Valid" aria-busy="true" id="create_button">Creating Server</button>
+          <div id="placeholder">
+            <progress></progress>
+          </div>
+          
         </form>
       </div>
     </article>
@@ -46,9 +49,8 @@
 
     function onClose(evt) {
         console.log("Websocket DISCONNECTED");
-        document.getElementById("create_button").ariaBusy=false;
-        document.getElementById("create_button").ariaDisabled=false;
-        document.getElementById("create_button").innerText="Created server!";
+
+        document.getElementById("placeholder").innerHTML="<button type=\"submit\" placeholder=\"Valid\" id=\"create_button\">Created Server</button>"
         // document.getElementById("loader").ariaBusy = false;
         // var pre = document.getElementById("listbox").innerHTML+="<div></div>";
     }

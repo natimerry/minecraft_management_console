@@ -79,8 +79,10 @@ function query_status() {
     }
 }
 
-function startServer(index) {
-    var ws_uri = "ws://127.0.0.1:8000/start/" + servers[index].innerHTML;
+function startServer(button) {
+        // change index to name
+    console.log(this)
+    var ws_uri = "ws://127.0.0.1:8000/start/" + button.ariaValueText; // instead of indexing use name
     console.log(ws_uri);
 
     var ws = new WebSocket(ws_uri);
@@ -93,8 +95,9 @@ function startServer(index) {
     }
 
 }
-function stopServer(index) {
-    var ws_uri = "ws://127.0.0.1:8000/stop/" + servers[index].innerHTML;
+function stopServer(button) {
+    // change index to name
+    var ws_uri = "ws://127.0.0.1:8000/stop/" + button.ariaValueText; // instead of indexing use name
     console.log(ws_uri);
 
     var ws = new WebSocket(ws_uri);
@@ -111,4 +114,4 @@ function stopServer(index) {
 
 window.addEventListener("load", init, false);
 query_status();
-// setInterval(query_status, 5000);
+setInterval(query_status, 2200);
