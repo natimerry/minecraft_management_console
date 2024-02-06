@@ -57,7 +57,7 @@ pub mod mc_server {
     type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
     impl Server {
         pub fn load(path: PathBuf) -> Self {
-            serde_json::from_str(&std::fs::read_to_string(path.join("server_data.json")).unwrap())
+            serde_json::from_str(&std::fs::read_to_string(dbg!(path.join("server_data.json"))).unwrap())
                 .unwrap()
         }
         pub async fn run_self(&mut self) -> Result<Status> {
@@ -116,13 +116,11 @@ pub mod mc_server {
         }
 
         fn update_config(&self) {
-            let json_data = serde_json::to_string_pretty(&self).unwrap();
-            let _file = std::fs::OpenOptions::new()
-                .write(true)
-                .create(true)
-                .open(Path::new(&self.working_directory).join("server_data.json"))
-                .unwrap()
-                .write_all(format!("{json_data}").as_bytes());
+            serde_json::to_writer_pretty(
+                &File::create(Path::new(&self.working_directory).join("server_data.json")).unwrap(),
+                &self,
+            )
+            .unwrap();
         }
         pub async fn create_new_server(
             server_name: &str,

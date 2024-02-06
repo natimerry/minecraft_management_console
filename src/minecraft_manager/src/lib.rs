@@ -2,7 +2,7 @@ pub mod server;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
-    fs::{self, ReadDir},
+    fs::{self, File, ReadDir},
     io::Write,
     path::{Path, PathBuf},
 };
@@ -39,13 +39,7 @@ pub struct McServerManager {
 
 impl McServerManager {
     pub fn update_config(&self) {
-        let json_data = serde_json::to_string_pretty(&self).unwrap();
-        let _ = std::fs::OpenOptions::new()
-            .write(true)
-            .create(true)
-            .open(&self.json_location)
-            .unwrap()
-            .write_all(format!("{json_data}").as_bytes());
+        serde_json::to_writer_pretty(&File::create(&self.json_location).unwrap(), &self).unwrap();
     }
     pub fn new(json_file: Option<&str>) -> Self {
         let json_path: PathBuf;
@@ -60,7 +54,6 @@ impl McServerManager {
             manager.json_location = json_path.to_str().unwrap().to_string();
         } else {
             let current_dir = fs::canonicalize(Path::new("./")).unwrap();
-            let cache_file = current_dir.join("cache.txt").to_str().unwrap().to_string();
             let directory = current_dir
                 .join("minecraft_servers")
                 .to_str()
@@ -74,20 +67,8 @@ impl McServerManager {
                 ..Default::default()
             };
 
-            // let json_data = serde_json::to_string_pretty(&manager).unwrap();
-            // let _ = std::fs::OpenOptions::new()
-            //     .write(true)
-            //     .create(true)
-            //     .open(json_path)
-            //     .unwrap()
-            //     .write_all(format!("{json_data}").as_bytes());
-            let json_data = serde_json::to_string_pretty(&manager).unwrap();
-            let _ = std::fs::OpenOptions::new()
-                .write(true)
-                .create(true)
-                .open(json_path)
-                .unwrap()
-                .write_all(format!("{json_data}").as_bytes());
+            let json_data =
+                serde_json::to_writer_pretty(&File::create(json_path).unwrap(), &manager).unwrap();
         }
         if !Path::new(&manager.directory).exists() {
             std::fs::create_dir(&manager.directory);
@@ -110,7 +91,7 @@ impl McServerManager {
         self.used_ports.push(port);
         dbg!(&self.used_ports);
         let mut _file = std::fs::OpenOptions::new()
-            .append(true)
+            .write(true)
             .create(true)
             .open(
                 Path::new(&self.directory.clone())
