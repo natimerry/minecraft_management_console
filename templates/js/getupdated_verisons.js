@@ -63,7 +63,7 @@ function query_status() {
     var websockets = []
     for (let i = 0; i < servers.length; i++) {
         let text = servers[i].innerHTML.split(' - ')[0];
-        var receive_uri = "ws://127.0.0.1:8000/status/";
+        var receive_uri = "wss://console.natimerry.com/status/";
         receive_uri += text;
         websockets.push(new WebSocket(receive_uri));
     }

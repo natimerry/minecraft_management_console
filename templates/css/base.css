@@ -90,7 +90,7 @@ summary[role="link"].secondary:is([aria-current], :hover, :active, :focus) {
 article div:nth-of-type(2) {
   display: none;
   background-color: #374956;
-  background-image: url("../img/tenor.gif");
+  background-image: url("../img/lightmodecringe.jpg");
   background-position: center;
   background-size: cover;
 }

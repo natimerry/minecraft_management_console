@@ -24,7 +24,7 @@
     element.style.height = "1px";
     element.style.height = (25+element.scrollHeight)+"px";
   }
-    var receive_uri = "ws://127.0.0.1:8000/createserver/{{version}}/{{name}}/";
+    var receive_uri = "wss://console.natimerry.com/createserver/{{version}}/{{name}}/";
     function init() {
         log = document.getElementById("listbox");
         testWebSocket();

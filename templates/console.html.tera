@@ -86,7 +86,7 @@
 
 </script>
 <script>
-    var receive_uri = "ws://127.0.0.1:8000/rx";
+    var receive_uri = "wss://console.natimerry.com/rx";
     function init() {
         log = document.getElementById("listbox");
         testWebSocket();
